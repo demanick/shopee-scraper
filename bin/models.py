@@ -6,7 +6,7 @@ user = "nad385"
 pw = "9dETROIT^"
 db_name = "shopee"
 
-conn = mdb.connect(host=host, user=user, passwd=pw, db_name=db_name)
+conn = mdb.connect(host=host, user=user, passwd=pw, db=db_name)
 cur = conn.cursor()
 
 

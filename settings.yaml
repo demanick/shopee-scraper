@@ -1,0 +1,7 @@
+# configuration document for shopee_scraper
+
+# HTTP
+headers:
+  user_agent: Mozilla/5.0
+max_requests: 2000000
+proxy_urls: []

@@ -125,7 +125,7 @@ class Shop(object):
 
 if __name__ == '__main__':
     # set up tables
-    cur.execute('''CREATE TABLE IF NOT EXISTS products (
+    cur.execute('''CREATE TABLE IF NOT EXISTS shops (
         id bigint,
         name varchar(2056),
         followers int,

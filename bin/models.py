@@ -132,7 +132,6 @@ if __name__ == '__main__':
         products int,
         rating float,
         ratings_count int,
-        followers int,
         PRIMARY KEY (id)
     )''')
     conn.commit()

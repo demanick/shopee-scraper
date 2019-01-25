@@ -1,6 +1,6 @@
 import eventlet
 import logging
-import yaml
+import redis
 
 requests = eventlet.import_patched('requests.__init__')
 time = eventlet.import_patched('time')
@@ -9,10 +9,9 @@ log = logging.getLogger(__name__)
 
 num_requests= 0
 
-
-def configure_params():
-    '''function to extract params from yaml and populate settings variables'''
-    pass
+# load params
+from settings import Settings
+settings = Settings()
 
 
 def make_request(url, return_json=True):

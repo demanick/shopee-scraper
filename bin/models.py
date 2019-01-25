@@ -154,3 +154,4 @@ if __name__ == '__main__':
         FOREIGN KEY (shopid) REFERENCES shops(id)
     );''')
     conn.commit()
+    conn.close()

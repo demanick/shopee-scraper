@@ -1,6 +1,8 @@
 import eventlet
 import logging
+import random
 import redis
+from requests.exceptions import RequestException
 
 requests = eventlet.import_patched('requests.__init__')
 time = eventlet.import_patched('time')
@@ -13,6 +15,8 @@ num_requests= 0
 from settings import Settings
 settings = Settings()
 
+redis = redis.StrictRedis(host=settings.redis_host, port=settings.redis_port, db=settings.redis_db)
+
 
 def make_request(url, return_json=True):
     '''makes http request to url via requests lib'''
@@ -23,7 +27,7 @@ def make_request(url, return_json=True):
 
     proxy_urls = get_proxy()
     try:
-        r = requests.get(url, headers=settings.headers, proxy_urls=proxy_urls)
+        r = requests.get(url, headers=settings.headers, proxies=proxy_urls)
     except RequestException as e:
         log.info("Request for %s failed." % url)
         return make_request(url)
@@ -39,10 +43,10 @@ def make_request(url, return_json=True):
 
 def get_proxy():
     # choose a proxy server to use for this request, if we need one
-    if not settings.proxies or len(settings.proxies) == 0:
+    if not settings.proxy_urls or len(settings.proxy_urls) == 0:
         return None
 
-    proxy_ip = random.choice(settings.proxies)
+    proxy_ip = random.choice(settings.proxy_urls)
     proxy_url = "socks5://{user}:{passwd}@{ip}:{port}/".format(
         user=settings.proxy_user,
         passwd=settings.proxy_pass,
@@ -68,3 +72,6 @@ if __name__ == '__main__':
     url = "https://shopee.co.id/api/v2/search_items/?by=pop&limit=100&match_id=33&newest=8000&order=desc&page_type=search"
     json_obj = make_request(url)
     print(json_obj)
+    # test Redis
+    print(enqueue_url(url, "test_queue"))
+    print(dequeue_url("test_queue"))

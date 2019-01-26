@@ -13,7 +13,17 @@ class Settings(object):
         # extract HTTP params
         self.headers = params['headers']
         self.max_requests = params['max_requests']
+
+        # extract proxy params
         self.proxy_urls = params['proxy_urls']
+        self.proxy_user = params['proxy_user']
+        self.proxy_pass = params['proxy_pass']
+        self.proxy_port = params['proxy_port']
+
+        # extract Redis params
+        self.redis_host = params['redis_host']
+        self.redis_port = params['redis_port']
+        self.redis_db = params['redis_db']
 
 if __name__ == '__main__':
     # print params as disctionary

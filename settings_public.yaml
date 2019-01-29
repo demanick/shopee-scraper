@@ -1,7 +1,7 @@
 # configuration document for shopee_scraper
 
 # crawler
-category_id: main
+category_level: main
 max_threads: 200
 
 # HTTP
@@ -10,9 +10,9 @@ headers:
 max_requests: 2000000
 
 # MySQL
-host: scrapingdb.cexqjqkwvxs5.us-east-1.rds.amazonaws.com
-user: nad385
-pw: 9dETROIT^
+host: ''
+user: ''
+pw: ''
 db_name: shopee
 
 # Proxies

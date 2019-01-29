@@ -1,12 +1,13 @@
 import MySQLdb as mdb
 
+from settings import Settings
 
-host = "scrapingdb.cexqjqkwvxs5.us-east-1.rds.amazonaws.com"
-user = "nad385"
-pw = "9dETROIT^"
-db_name = "shopee"
 
-conn = mdb.connect(host=host, user=user, passwd=pw, db=db_name)
+settings = Settings()
+
+
+conn = mdb.connect(host=settings.host, user=settings.user,
+                    passwd=settings.pw, db=settings.db_name)
 cur = conn.cursor()
 
 

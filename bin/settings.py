@@ -1,6 +1,7 @@
 import os
 import yaml
 
+
 ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
@@ -10,9 +11,18 @@ class Settings(object):
         with open(os.path.join(ROOT, 'settings.yaml')) as config_file:
             params = yaml.load(config_file)
 
+        # environment
+        self.root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
         # extract HTTP params
         self.headers = params['headers']
         self.max_requests = params['max_requests']
+
+        # extract MySQL params
+        self.host = params['host']
+        self.user = params['user']
+        self.pw = params['pw']
+        self.db_name = params['db_name']
 
         # extract proxy params
         self.proxy_urls = params['proxy_urls']
@@ -24,6 +34,10 @@ class Settings(object):
         self.redis_host = params['redis_host']
         self.redis_port = params['redis_port']
         self.redis_db = params['redis_db']
+
+        # crawling
+        self.category_level = params['category_level']
+        self.max_threads = params['max_threads']
 
 if __name__ == '__main__':
     # print params as disctionary

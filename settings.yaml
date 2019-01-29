@@ -1,9 +1,19 @@
 # configuration document for shopee_scraper
 
+# crawler
+category_level: main
+max_threads: 200
+
 # HTTP
 headers:
   user_agent: Mozilla/5.0
 max_requests: 2000000
+
+# MySQL
+host: ''
+user: ''
+pw: ''
+db_name: shopee
 
 # Proxies
 proxy_urls: []

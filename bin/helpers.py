@@ -2,18 +2,23 @@ import eventlet
 import logging
 import random
 import redis
+
 from requests.exceptions import RequestException
+from settings import Settings
+
+
+log = logging.getLogger(__name__)
+
+
+settings = Settings()
+
+
+num_requests= 0
+
 
 requests = eventlet.import_patched('requests.__init__')
 time = eventlet.import_patched('time')
 
-log = logging.getLogger(__name__)
-
-num_requests= 0
-
-# load params
-from settings import Settings
-settings = Settings()
 
 redis = redis.StrictRedis(host=settings.redis_host, port=settings.redis_port, db=settings.redis_db)
 

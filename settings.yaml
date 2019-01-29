@@ -10,9 +10,9 @@ headers:
 max_requests: 2000000
 
 # MySQL
-host: ''
-user: ''
-pw: ''
+host: scrapingdb.cexqjqkwvxs5.us-east-1.rds.amazonaws.com
+user: nad385
+pw: 9dETROIT^
 db_name: shopee
 
 # Proxies

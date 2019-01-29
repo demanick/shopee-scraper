@@ -5,9 +5,12 @@ from helpers import dequeue_url, enqueue_url, make_request
 from models import Product, Shop
 from settings import Settings
 
-ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+log = logging.getLogger(__name__)
+
 
 settings = Settings ()
+
 
 # global variables for jeeping track of shops and products
 product_counter = 0
@@ -17,7 +20,7 @@ shop_cache = []
 def create_directory_urls():
     # extract category ids
     category_file = '{}.txt'.format(settings.category_level)
-    with open(os.path.join(ROOT, 'data', category_file)) as f:
+    with open(os.path.join(settings.root, 'data', category_file)) as f:
         categories = [int(x) for x in f.read().split('\n')]
 
     # iterate through categories to create urls
@@ -25,9 +28,9 @@ def create_directory_urls():
     for c in categories:
         for i in range(0, 8100, 100):
             enqueue_url('directory_q', directory_url.format(id=c, newest=i))
-        logging.info('urls created for category: %i' % c)
+        log.info('urls created for category: %i' % c)
 
-    logging.info('directory urls successfully seeded')
+    log.info('directory urls successfully seeded')
 
 
 def harvest_directories():
@@ -38,9 +41,9 @@ def harvest_directories():
     # grab directory url
     directory_url = dequeue_url('directory_q')
     if not directory_url:
-        logging.info('COMPLETE: directory url processing')
-        logging.info('%i product urls processed' % product_counter)
-        logging.info('%i shop urls processed' % len(shop_cache))
+        log.info('COMPLETE: directory url processing')
+        log.info('%i product urls processed' % product_counter)
+        log.info('%i shop urls processed' % len(shop_cache))
 
     # extract json
     json_obj = make_request(directory_url)
@@ -61,7 +64,7 @@ def harvest_products():
     # pop url from redis db
     url = dequeue_url('product_q')
     if not url:
-        logging.info('COMPLETE: product url processing')
+        log.info('COMPLETE: product url processing')
 
     # process and insert product data
     json_obj = make_request(url)
@@ -74,10 +77,10 @@ def harvest_shops():
     # pop url from redis db
     url = dequeue_url('shop_q')
     if not url:
-        logging.info('COMPLETE: shop url processing')
+        log.info('COMPLETE: shop url processing')
 
     # process and insert shop data
     json_obj = make_request(url)
     shop = Shop(json_obj)
     shop.save()
-    logging.info('COMPLETE: shop (%i)' % shop.id)
+    log.info('COMPLETE: shop (%i)' % shop.id)

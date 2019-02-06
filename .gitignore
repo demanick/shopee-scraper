@@ -5,3 +5,4 @@ bin/__pycache__/*
 trees/*
 docs/*
 data/*
+settings_prod.yaml

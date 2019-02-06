@@ -1,7 +1,6 @@
 # virutalenv
 *.log
 shopee_scraper_env/*
-/__pycache__/*
+bin/__pycache__/*
 trees/*
 docs/*
-settings.yaml

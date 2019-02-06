@@ -43,6 +43,7 @@ if __name__ == '__main__':
     # print params as disctionary
     settings = Settings()
     settings_dict = vars(settings)
+    print(settings.headers)
 
     # recursive function to explode out dict
     def explode_dict(d, offset=0):

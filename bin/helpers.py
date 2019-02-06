@@ -52,7 +52,7 @@ def get_proxy():
         return None
 
     proxy_ip = random.choice(settings.proxy_urls)
-    proxy_url = "socks5://{user}:{passwd}@{ip}:{port}/".format(
+    proxy_url = "http://{user}:{passwd}@{ip}:{port}/".format(
         user=settings.proxy_user,
         passwd=settings.proxy_pass,
         ip=proxy_ip,
@@ -65,7 +65,7 @@ def get_proxy():
         "https": proxy_url
     }
 
-def enqueue_url(url, queue):
+def enqueue_url(queue, url):
     return redis.sadd(queue, url)
 
 def dequeue_url(queue):

@@ -1,6 +1,10 @@
+import logging
 import MySQLdb as mdb
 
 from settings import Settings
+
+
+log = logging.getLogger(__name__)
 
 
 settings = Settings()
@@ -38,7 +42,7 @@ class Product(object):
             INSERT INTO products (
                 id,
                 name,
-                shop_id,
+                shopid,
                 price_min,
                 price_max,
                 discount,
@@ -70,7 +74,8 @@ class Product(object):
             ))
             conn.commit()
             return 0
-        except:
+        except Exception as e:
+            log.error(e)
             conn.rollback()
             return -1
 
@@ -98,13 +103,13 @@ class Shop(object):
     def save(self):
         try:
             cur.execute('''
-            INSERT INTO (
+            INSERT INTO shops (
                 id,
                 name,
                 followers,
                 products,
                 rating,
-                rating_count,
+                ratings_count,
                 mall
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -119,7 +124,8 @@ class Shop(object):
             ))
             conn.commit()
             return 0
-        except:
+        except Exception as e:
+            log.error(e)
             conn.rollback()
             return -1
 

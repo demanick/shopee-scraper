@@ -78,5 +78,5 @@ if __name__ == '__main__':
     json_obj = make_request(url)
     print(json_obj)
     # test Redis
-    print(enqueue_url(url, "test_queue"))
+    print(enqueue_url("test_queue", url))
     print(dequeue_url("test_queue"))

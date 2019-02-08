@@ -1,12 +1,17 @@
-import eventlet
+import eventlets
 eventlet.monkey_patch()
 import logging
 import os
 
+from datetime import datetime
 from helpers import dequeue_url, enqueue_url, make_request
 from models import Product, Shop
 from settings import Settings
 from sys import argv
+
+
+# collect date of run
+DATE = datetime.now().strftime('%Y-%m-%d')
 
 
 # instantiate settings variables
@@ -79,7 +84,7 @@ def harvest_products():
     # process and insert product data
     json_obj = make_request(url)
     product = Product(json_obj)
-    if product.save() == 0:
+    if product.save(DATE) == 0:
         logging.info('COMPLETE: product (%i); shop (%i)' % (product.id, product.shopid))
     else:
         logging.warning('INSERT FAIL: product (%i); shop (%i)' % (product.id, product.shopid))
@@ -97,7 +102,7 @@ def harvest_shops():
     # process and insert shop data
     json_obj = make_request(url)
     shop = Shop(json_obj)
-    if shop.save() == 0:
+    if shop.save(DATE) == 0:
         logging.info('COMPLETE: shop (%i)' % shop.id)
     else:
         logging.info('INSERT FAIL: shop (%i)' % shop.id)

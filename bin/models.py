@@ -36,10 +36,11 @@ class Product(object):
         self.stock = item_json['stock']
         self.free_shipping = item_json['show_free_shipping']
 
-    def save(self):
+    def save(self, date):
         try:
             cur.execute('''
             INSERT INTO products (
+                extract_date,
                 id,
                 name,
                 shopid,
@@ -57,6 +58,7 @@ class Product(object):
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ''',(
+                date,
                 self.id,
                 self.name,
                 self.shopid,
@@ -104,6 +106,7 @@ class Shop(object):
         try:
             cur.execute('''
             INSERT INTO shops (
+                extract_date,
                 id,
                 name,
                 followers,
@@ -114,6 +117,7 @@ class Shop(object):
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             ''',(
+                date,
                 self.id,
                 self.name,
                 self.followers,
@@ -133,6 +137,7 @@ class Shop(object):
 if __name__ == '__main__':
     # set up tables
     cur.execute('''CREATE TABLE IF NOT EXISTS shops (
+        extract_date date,
         id bigint,
         name varchar(2056),
         followers int,
@@ -143,6 +148,7 @@ if __name__ == '__main__':
     )''')
     conn.commit()
     cur.execute('''CREATE TABLE IF NOT EXISTS products (
+        extract_date date,
         id bigint,
         name varchar(2056),
         shopid bigint,

@@ -1,9 +1,8 @@
 import eventlet
+eventlet.monkey_patch()
 import logging
 import os
 
-from crawlers import (create_directory_urls, harvest_directories,
-                      harvest_products, harvest_shops)
 from helpers import dequeue_url, enqueue_url, make_request
 from models import Product, Shop
 from settings import Settings
@@ -28,7 +27,7 @@ def create_directory_urls():
     # extract category ids
     category_file = '{}.txt'.format(settings.category_level)
     with open(os.path.join(settings.root, 'data', category_file)) as f:
-        categories = [int(x) for x in f.read().split('\n')]
+        categories = [int(x) for x in f.read().split('\n')[:-1]]
 
     # iterate through categories to create urls
     directory_url = 'https://shopee.co.id/api/v2/search_items/?by=pop&limit=100&match_id={id}&newest={newest}&order=desc&page_type=search'
@@ -75,12 +74,15 @@ def harvest_products():
     url = dequeue_url('product_q')
     if not url:
         log.info('COMPLETE: product url processing')
+        return
 
     # process and insert product data
     json_obj = make_request(url)
     product = Product(json_obj)
-    product.save()
-    logging.info('COMPLETE: product (%i); shop (%i)' % (product.id, product.shopid))
+    if product.save() == 0:
+        logging.info('COMPLETE: product (%i); shop (%i)' % (product.id, product.shopid))
+    else:
+        logging.warning('INSERT FAIL: product (%i); shop (%i)' % (product.id, product.shopid))
 
     pile.spawn(harvest_products)
 
@@ -90,12 +92,15 @@ def harvest_shops():
     url = dequeue_url('shop_q')
     if not url:
         log.info('COMPLETE: shop url processing')
+        return
 
     # process and insert shop data
     json_obj = make_request(url)
     shop = Shop(json_obj)
-    shop.save()
-    log.info('COMPLETE: shop (%i)' % shop.id)
+    if shop.save() == 0:
+        logging.info('COMPLETE: shop (%i)' % shop.id)
+    else:
+        logging.info('INSERT FAIL: shop (%i)' % shop.id)
 
     pile.spawn(harvest_shops)
 
@@ -105,31 +110,21 @@ def shopee_scraper():
     logging.info('STARTING: processing directory urls')
     [pile.spawn(harvest_directories) for _ in range(settings.max_threads)]
     pool.waitall()
-    # begin processing of product urls
-    logging.info('STARTING: processing product urls')
-    [pile.spawn(harvest_products) for _ in range(settings.max_threads)]
-    pool.waitall()
     # being processing of shop urls
     logging.info('STARTING: processing shop urls')
     [pile.spawn(harvest_shops) for _ in range(settings.max_threads)]
     pool.waitall()
-
-
-def test_shopee_scraper():
-    pass
+    # begin processing of product urls
+    logging.info('STARTING: processing product urls')
+    [pile.spawn(harvest_products) for _ in range(settings.max_threads)]
+    pool.waitall()
 
 
 if __name__ == '__main__':
     # set up log file
-    logging.config.fileConfig(os.path.join(settings.root, 'bin', 'logging.conf'))
+    logging.config.fileConfig(os.path.join(settings.root, 'bin', 'logging.conf'), disable_existing_loggers=False)
 
     # seed urls if first run
     if len(argv) > 1 and argv[2] == 'seed':
         logging.infor('STARTING: seeding direcotry urls')
         create_directory_urls()
-
-    # test if param passed, otherwise run
-    if len(argv) > 2 and argv[3] == 'test':
-        test_shopee_scraper()
-    else:
-        shopee_scraper()

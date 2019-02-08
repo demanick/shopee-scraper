@@ -4,5 +4,5 @@ shopee_scraper_env/*
 bin/__pycache__/*
 trees/*
 docs/*
-data/*
+data/*.csv
 settings_prod.yaml

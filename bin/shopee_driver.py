@@ -1,6 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 import logging
+import logging.config
 import os
 import redis
 
@@ -12,7 +13,7 @@ from sys import argv
 
 
 # collect date of run
-DATE = datetime.now().strftime('%Y-%m-%d')
+DATE = datetime.now().strftime('%Y_%m_%d')
 
 
 # instantiate settings variables

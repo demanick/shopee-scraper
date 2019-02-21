@@ -46,21 +46,21 @@ def set_up(date):
         stock int,
         free_shipping boolean,
         PRIMARY KEY (id),
-        FOREIGN KEY (shopid) REFERENCES shops(id)
-    );'''.format(date))
+        FOREIGN KEY (shopid) REFERENCES shops_{}(id)
+    );'''.format(date, date))
     conn.commit()
     cur.execute('''CREATE TABLE IF NOT EXISTS productid_map_{} (
         extract_date date,
         productid int,
         catid int
     )'''.format(date))
-    conn.commt()
+    conn.commit()
     cur.execute('''CREATE TABLE IF NOT EXISTS categories_{} (
         extract_date date,
         catid int,
         catname varchar(255),
         cattier varchar(255),
-        PRIMARY KEY (caitd)
+        PRIMARY KEY (catid)
     )'''.format(date))
     conn.commit()
     return 0
@@ -88,10 +88,10 @@ class Category(object):
         try:
             cur.execute('''
             INSERT INTO categories_{} (
-                extract_date date,
-                catid int,
-                catname varchar(255),
-                catlevel varchar(255)
+                extract_date,
+                catid,
+                catname,
+                catlevel
             )
             VALUES (%s, %s, %s, %s)
             )'''.format(date),(

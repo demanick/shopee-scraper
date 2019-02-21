@@ -6,6 +6,7 @@ trees/*
 # other
 *.log
 bin/__pycache__/*
+bin/data/*
 notebooks/*
 settings_prod.yaml
 

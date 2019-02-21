@@ -1,7 +1,10 @@
+import json
 import logging
 import MySQLdb as mdb
+import os
 
 from datetime import datetime
+from db_setup import create_db
 from helpers import make_request
 from settings import Settings
 
@@ -15,97 +18,6 @@ settings = Settings()
 conn = mdb.connect(host=settings.host, user=settings.user,
                     passwd=settings.pw, db=settings.db_name)
 cur = conn.cursor()
-
-
-def set_up(date):
-    cur.execute('''CREATE TABLE IF NOT EXISTS shops_{} (
-        extract_date date,
-        id bigint,
-        name varchar(2056),
-        followers int,
-        products int,
-        rating float,
-        ratings_count int,
-        PRIMARY KEY (id)
-    )'''.format(date))
-    conn.commit()
-    cur.execute('''CREATE TABLE IF NOT EXISTS products_{} (
-        extract_date date,
-        id bigint,
-        name varchar(2056),
-        shopid bigint,
-        price_min float,
-        price_max float,
-        show_discount int,
-        currency varchar(50),
-        rating float,
-        rating_count int,
-        comments int,
-        likes int,
-        sold int,
-        stock int,
-        free_shipping boolean,
-        PRIMARY KEY (id),
-        FOREIGN KEY (shopid) REFERENCES shops_{}(id)
-    );'''.format(date, date))
-    conn.commit()
-    cur.execute('''CREATE TABLE IF NOT EXISTS productid_map_{} (
-        extract_date date,
-        productid int,
-        catid int
-    )'''.format(date))
-    conn.commt()
-    cur.execute('''CREATE TABLE IF NOT EXISTS categories_{} (
-        extract_date date,
-        catid int,
-        catname varchar(255),
-        cattier varchar(255),
-        PRIMARY KEY (caitd)
-    )'''.format(date))
-    conn.commit()
-    return 0
-
-
-class Category(object):
-    def __init__(self, date, timestamp, json_obj):
-        cat_json = json_obj
-
-        # translate to database immediately, this is a statics object
-        for cat in cat_json:
-            main = cat['main']
-            self._save(date, timestamp, main['catid'], main['name'], 'main')
-            # move on to sub json
-            sub1_json = cat['sub']
-            for sub1 in sub1_json:
-                self._save(date, timestamp, sub1['catid'], sub1['name'], 'sub1')
-                # move on to sub_sub json
-                sub2_json = sub1['sub_sub']
-                for sub2 in sub2_json:
-                    self._save(date, timestamp, sub2['catid'], sub2['name'], 'sub2')
-
-
-    def _save(self, date, timestamp, catid, catname, catlevel):
-        try:
-            cur.execute('''
-            INSERT INTO categories_{} (
-                extract_date,
-                catid,
-                catname,
-                catlevel
-            )
-            VALUES (%s, %s, %s, %s)
-            )'''.format(date),(
-                timestamp,
-                catid,
-                catname,
-                catlevel
-            ))
-            conn.commit()
-            return 0
-        except Exception as e:
-            log.error(e)
-            conn.rollback()
-            return -1
 
 
 class Product(object):
@@ -160,21 +72,20 @@ class Product(object):
                 extract_date,
                 id,
                 name,
-                catid,
                 shopid,
-                price_min,
                 price_max,
+                price_min,
                 discount,
                 currency,
                 rating,
                 rating_count,
-                likes,
                 comments,
+                likes,
                 sold,
                 stock,
                 free_shipping
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''.format(self.date), (
                 self.timestamp,
                 self.id,
@@ -210,6 +121,7 @@ class Shop(object):
     def __init__(self, date, timestamp, json_obj):
         # set date attribute
         self.date = date
+        self.timestamp = timestamp
 
         # data is nested under data key
         shop_json = json_obj['data']
@@ -233,12 +145,12 @@ class Shop(object):
                 followers,
                 products,
                 rating,
-                ratings_count,
+                rating_count,
                 mall
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             '''.format(self.date), (
-                self.tiemstamp,
+                self.timestamp,
                 self.id,
                 self.name,
                 self.followers,
@@ -256,11 +168,28 @@ class Shop(object):
 
 
 if __name__ == '__main__':
-    # set up tables
-    date = datetime.now().strftime('%Y_%m_%d')
+    # run unit test for file
+    create_db('temp')
     timestamp = datetime.now().strftime('%Y-%m-%d')
-    set_up(date)
-    # get data from API endpoint fro categories
-    cat_json = make_request('https://shopee.co.id/api/v1/category_list/')
-    Category(date, make_request)
-    conn.close()
+
+    # extract testing data from files
+    with open(os.path.join(settings.root, 'data', 'shop.json'), 'r') as read_file:
+        test_shop_json = json.load(read_file)
+
+    with open(os.path.join(settings.root, 'data', 'product.json'), 'r') as read_file:
+        test_product_json = json.load(read_file)
+
+    # instantiate Product and Shop objects
+    shop = Shop('temp', timestamp, test_shop_json)
+    product = Product('temp', timestamp, test_product_json)
+
+    # test saving
+    if shop.save() == 0:
+        print('saving shop record successful')
+    else:
+        print('saving shop record failed')
+
+    if product.save() == 0:
+        print('Saving product record successful')
+    else:
+        print('Saving product record failed')

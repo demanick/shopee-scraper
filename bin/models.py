@@ -175,12 +175,11 @@ class Product(object):
                 stock,
                 free_shipping
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''.format(self.date), (
                 self.date,
                 self.id,
                 self.name,
-                self.catid
                 self.shopid,
                 self.price_min,
                 self.price_max,

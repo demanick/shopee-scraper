@@ -1,4 +1,4 @@
-import eventlets
+import eventlet
 eventlet.monkey_patch()
 import logging
 import os
@@ -6,7 +6,7 @@ import redis
 
 from datetime import datetime
 from helpers import dequeue_url, enqueue_url, make_request
-from models import set_up, Product, Shop
+from models import set_up, Category, Product, Shop
 from settings import Settings
 from sys import argv
 
@@ -75,7 +75,7 @@ def harvest_directories():
             shop_cache.append(item['shopid'])
             enqueue_url('shop_q', shop_url.format(shopid=item['shopid']))
 
-    logging.info('COMPLETE: directory at %s' $ directory_url)
+    logging.info('COMPLETE: directory at %s' % directory_url)
     pile.spawn(harvest_directories)
 
 
@@ -83,7 +83,7 @@ def harvest_products():
     # pop url from redis db
     url = dequeue_url('product_q')
     if not url:
-        log.info('COMPLETE: product url processing')
+        logging.info('COMPLETE: product url processing')
         return
 
     # process and insert product data
@@ -101,7 +101,7 @@ def harvest_shops():
     # pop url from redis db
     url = dequeue_url('shop_q')
     if not url:
-        log.info('COMPLETE: shop url processing')
+        logging.info('COMPLETE: shop url processing')
         return
 
     # process and insert shop data
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     if len(argv) > 1 and argv[1] == 'seed':
         logging.info('FLUSHIN REDIS DB')
         redis.flushdb()
-        logging.infor('STARTING: seeding direcotry urls')
+        logging.info('STARTING: seeding direcotry urls')
         create_directory_urls()
 
     # look for second positional arg
@@ -147,6 +147,6 @@ if __name__ == '__main__':
         set_up(DATE)
         # get data from API endpoint fro categories
         cat_json = make_request('https://shopee.co.id/api/v1/category_list/')
-        Category(date, cat_json) 
+        Category(DATE, cat_json)
 
     shopee_scraper()

@@ -14,6 +14,7 @@ from sys import argv
 
 # collect date of run
 DATE = datetime.now().strftime('%Y_%m_%d')
+TMESTAMP = datetime.now().strftime('%Y-%m-%d')
 
 
 # instantiate settings variables
@@ -89,8 +90,10 @@ def harvest_products():
 
     # process and insert product data
     json_obj = make_request(url)
-    product = Product(json_obj)
-    if product.save(DATE) == 0:
+    product = Product(DATE, TIMESTAMP, json_obj)
+    # map and save products
+    product.map()
+    if product.save() == 0:
         logging.info('COMPLETE: product (%i); shop (%i)' % (product.id, product.shopid))
     else:
         logging.warning('INSERT FAIL: product (%i); shop (%i)' % (product.id, product.shopid))

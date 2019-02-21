@@ -67,24 +67,24 @@ def set_up(date):
 
 
 class Category(object):
-    def __init__(self, date, json_obj):
+    def __init__(self, date, timestamp, json_obj):
         cat_json = json_obj
 
         # translate to database immediately, this is a statics object
         for cat in cat_json:
             main = cat['main']
-            self._save(date, main['catid'], main['name'], 'main')
+            self._save(date, timestamp, main['catid'], main['name'], 'main')
             # move on to sub json
             sub1_json = cat['sub']
             for sub1 in sub1_json:
-                self._save(date, sub1['catid'], sub1['name'], 'sub1')
+                self._save(date, timestamp, sub1['catid'], sub1['name'], 'sub1')
                 # move on to sub_sub json
                 sub2_json = sub1['sub_sub']
                 for sub2 in sub2_json:
-                    self._save(date, sub2['catid'], sub2['name'], 'sub2')
+                    self._save(date, timestamp, sub2['catid'], sub2['name'], 'sub2')
 
 
-    def _save(self, date, catid, catname, catlevel):
+    def _save(self, date, timestamp, catid, catname, catlevel):
         try:
             cur.execute('''
             INSERT INTO categories_{} (
@@ -95,7 +95,7 @@ class Category(object):
             )
             VALUES (%s, %s, %s, %s)
             )'''.format(date),(
-                date,
+                timestamp,
                 catid,
                 catname,
                 catlevel
@@ -109,9 +109,10 @@ class Category(object):
 
 
 class Product(object):
-    def __init__(self, date, json_obj):
+    def __init__(self, date, timestamp, json_obj):
         # set date
         self.date = date
+        self.timestamp = timestamp
 
         # all data is nested under 'item' key
         item_json = json_obj['item']
@@ -138,21 +139,19 @@ class Product(object):
             try:
                 cur.execute('''
                 INSERT INTO product_id_map_{} (
-                    extract_date date,
+                    extract_date,
                     catid,
                     productid
                 )
                 VALUES (%s, %s, %s)'''.format(self.date), (
-                    self.date,
+                    self.timestamp,
                     catid,
                     self.id
                 ))
                 conn.commit()
-                return 0
             except Exception as e:
                 log.error(e)
                 conn.rollback()
-                return -1
 
     def save(self):
         try:
@@ -177,7 +176,7 @@ class Product(object):
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''.format(self.date), (
-                self.date,
+                self.timestamp,
                 self.id,
                 self.name,
                 self.shopid,
@@ -208,7 +207,7 @@ class Product(object):
 
 
 class Shop(object):
-    def __init__(self, date, json_obj):
+    def __init__(self, date, timestamp, json_obj):
         # set date attribute
         self.date = date
 
@@ -239,7 +238,7 @@ class Shop(object):
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             '''.format(self.date), (
-                self.date,
+                self.tiemstamp,
                 self.id,
                 self.name,
                 self.followers,
@@ -259,6 +258,7 @@ class Shop(object):
 if __name__ == '__main__':
     # set up tables
     date = datetime.now().strftime('%Y_%m_%d')
+    timestamp = datetime.now().strftime('%Y-%m-%d')
     set_up(date)
     # get data from API endpoint fro categories
     cat_json = make_request('https://shopee.co.id/api/v1/category_list/')

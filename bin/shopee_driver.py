@@ -1,11 +1,12 @@
-import eventlets
+import eventlet
 eventlet.monkey_patch()
 import logging
 import os
+import redis
 
 from datetime import datetime
 from helpers import dequeue_url, enqueue_url, make_request
-from models import Product, Shop
+from models import set_up, Category, Product, Shop
 from settings import Settings
 from sys import argv
 
@@ -21,6 +22,10 @@ settings = Settings()
 # create GreenPools and Piles
 pool = eventlet.GreenPool(settings.max_threads)
 pile = eventlet.GreenPile(pool)
+
+
+# set up Redis
+redis = redis.StrictRedis(host=settings.redis_host, port=settings.redis_port, db=settings.redis_db)
 
 
 # global variables for jeeping track of shops and products
@@ -70,7 +75,7 @@ def harvest_directories():
             shop_cache.append(item['shopid'])
             enqueue_url('shop_q', shop_url.format(shopid=item['shopid']))
 
-    logging.info('COMPLETE: directory at %s' $ directory_url)
+    logging.info('COMPLETE: directory at %s' % directory_url)
     pile.spawn(harvest_directories)
 
 
@@ -78,7 +83,7 @@ def harvest_products():
     # pop url from redis db
     url = dequeue_url('product_q')
     if not url:
-        log.info('COMPLETE: product url processing')
+        logging.info('COMPLETE: product url processing')
         return
 
     # process and insert product data
@@ -96,7 +101,7 @@ def harvest_shops():
     # pop url from redis db
     url = dequeue_url('shop_q')
     if not url:
-        log.info('COMPLETE: shop url processing')
+        logging.info('COMPLETE: shop url processing')
         return
 
     # process and insert shop data
@@ -130,6 +135,18 @@ if __name__ == '__main__':
     logging.config.fileConfig(os.path.join(settings.root, 'bin', 'logging.conf'), disable_existing_loggers=False)
 
     # seed urls if first run
-    if len(argv) > 1 and argv[2] == 'seed':
-        logging.infor('STARTING: seeding direcotry urls')
+    if len(argv) > 1 and argv[1] == 'seed':
+        logging.info('FLUSHIN REDIS DB')
+        redis.flushdb()
+        logging.info('STARTING: seeding direcotry urls')
         create_directory_urls()
+
+    # look for second positional arg
+    if len(argv) > 2 and argv[2] == 'create':
+        logging.info('CREATING NEW SET OF DBS FOR {}'.format(DATE))
+        set_up(DATE)
+        # get data from API endpoint fro categories
+        cat_json = make_request('https://shopee.co.id/api/v1/category_list/')
+        Category(DATE, cat_json)
+
+    shopee_scraper()

@@ -1,6 +1,8 @@
 import logging
 import MySQLdb as mdb
 
+from datetime import datetime
+from helpers import make_request
 from settings import Settings
 
 
@@ -15,14 +17,109 @@ conn = mdb.connect(host=settings.host, user=settings.user,
 cur = conn.cursor()
 
 
+def set_up(date):
+    cur.execute('''CREATE TABLE IF NOT EXISTS shops_{} (
+        extract_date date,
+        id bigint,
+        name varchar(2056),
+        followers int,
+        products int,
+        rating float,
+        ratings_count int,
+        PRIMARY KEY (id)
+    )'''.format(date))
+    conn.commit()
+    cur.execute('''CREATE TABLE IF NOT EXISTS products_{} (
+        extract_date date,
+        id bigint,
+        name varchar(2056),
+        shopid bigint,
+        price_min float,
+        price_max float,
+        show_discount int,
+        currency varchar(50),
+        rating float,
+        rating_count int,
+        comments int,
+        likes int,
+        sold int,
+        stock int,
+        free_shipping boolean,
+        PRIMARY KEY (id),
+        FOREIGN KEY (shopid) REFERENCES shops(id)
+    );'''.format(date))
+    conn.commit()
+    cur.execute('''CREATE TABLE IF NOT EXISTS productid_map_{} (
+        extract_date date,
+        productid int,
+        catid int
+    )'''.format(date))
+    conn.commt()
+    cur.execute('''CREATE TABLE IF NOT EXISTS categories_{} (
+        extract_date date,
+        catid int,
+        catname varchar(255),
+        cattier varchar(255),
+        PRIMARY KEY (caitd)
+    )'''.format(date))
+    conn.commit()
+    return 0
+
+
+class Category(object):
+    def __init__(self, date, json_obj):
+        cat_json = json_obj
+
+        # translate to database immediately, this is a statics object
+        for cat in cat_json:
+            main = cat['main']
+            self._save(date, main['catid'], main['name'], 'main')
+            # move on to sub json
+            sub1_json = cat['sub']
+            for sub1 in sub1_json:
+                self._save(date, sub1['catid'], sub1['name'], 'sub1')
+                # move on to sub_sub json
+                sub2_json = sub1['sub_sub']
+                for sub2 in sub2_json:
+                    self._save(date, sub2['catid'], sub2['name'], 'sub2')
+
+
+    def _save(self, date, catid, catname, catlevel):
+        try:
+            cur.execute('''
+            INSERT INTO categories_{} (
+                extract_date date,
+                catid int,
+                catname varchar(255),
+                catlevel varchar(255)
+            )
+            VALUES (%s, %s, %s, %s)
+            )'''.format(date),(
+                date,
+                catid,
+                catname,
+                catlevel
+            ))
+            conn.commit()
+            return 0
+        except Exception as e:
+            log.error(e)
+            conn.rollback()
+            return -1
+
+
 class Product(object):
-    def __init__(self, json_obj):
+    def __init__(self, date, json_obj):
+        # set date
+        self.date = date
+
         # all data is nested under 'item' key
         item_json = json_obj['item']
 
         # extract data
         self.id = item_json['itemid']
         self.name = item_json['name']
+        self.catids = [c['catid'] for c in item_json['categories']]
         self.shopid = item_json['shopid']
         self.price_min = item_json['price_min']
         self.price_max = item_json['price_max']
@@ -36,13 +133,35 @@ class Product(object):
         self.stock = item_json['stock']
         self.free_shipping = item_json['show_free_shipping']
 
-    def save(self, date):
+    def map(self):
+        for catid in self.catids:
+            try:
+                cur.execute('''
+                INSERT INTO product_id_map_{} (
+                    extract_date date,
+                    catid,
+                    productid
+                )
+                VALUES (%s, %s, %s)'''.format(self.date), (
+                    self.date,
+                    catid,
+                    self.id
+                ))
+                conn.commit()
+                return 0
+            except Exception as e:
+                log.error(e)
+                conn.rollback()
+                return -1
+
+    def save(self):
         try:
             cur.execute('''
-            INSERT INTO products (
+            INSERT INTO products_{} (
                 extract_date,
                 id,
                 name,
+                catid,
                 shopid,
                 price_min,
                 price_max,
@@ -57,8 +176,8 @@ class Product(object):
                 free_shipping
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ''',(
-                date,
+            '''.format(self.date), (
+                self.date,
                 self.id,
                 self.name,
                 self.shopid,
@@ -89,7 +208,10 @@ class Product(object):
 
 
 class Shop(object):
-    def __init__(self, json_obj):
+    def __init__(self, date, json_obj):
+        # set date attribute
+        self.date = date
+
         # data is nested under data key
         shop_json = json_obj['data']
 
@@ -105,7 +227,7 @@ class Shop(object):
     def save(self):
         try:
             cur.execute('''
-            INSERT INTO shops (
+            INSERT INTO shops_{} (
                 extract_date,
                 id,
                 name,
@@ -116,8 +238,8 @@ class Shop(object):
                 mall
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ''',(
-                date,
+            '''.format(self.date), (
+                self.date,
                 self.id,
                 self.name,
                 self.followers,
@@ -136,35 +258,9 @@ class Shop(object):
 
 if __name__ == '__main__':
     # set up tables
-    cur.execute('''CREATE TABLE IF NOT EXISTS shops (
-        extract_date date,
-        id bigint,
-        name varchar(2056),
-        followers int,
-        products int,
-        rating float,
-        ratings_count int,
-        PRIMARY KEY (id)
-    )''')
-    conn.commit()
-    cur.execute('''CREATE TABLE IF NOT EXISTS products (
-        extract_date date,
-        id bigint,
-        name varchar(2056),
-        shopid bigint,
-        price_min float,
-        price_max float,
-        show_discount int,
-        currency varchar(50),
-        rating float,
-        rating_count int,
-        likes int,
-        comments int,
-        sold int,
-        stock int,
-        free_shipping boolean,
-        PRIMARY KEY (id),
-        FOREIGN KEY (shopid) REFERENCES shops(id)
-    );''')
-    conn.commit()
+    date = datetime.now().strftime('%Y_%m_%d')
+    set_up(date)
+    # get data from API endpoint fro categories
+    cat_json = make_request('https://shopee.co.id/api/v1/category_list/')
+    Category(date, make_request)
     conn.close()

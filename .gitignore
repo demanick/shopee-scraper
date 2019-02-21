@@ -1,8 +1,13 @@
-# virutalenv
-*.log
-shopee_scraper_env/*
-bin/__pycache__/*
-trees/*
-docs/*
+# data
 data/*.csv
+docs/*
+trees/*
+
+# other
+*.log
+bin/__pycache__/*
+notebooks/*
 settings_prod.yaml
+
+# virutalenv
+shopee_scraper_env/*

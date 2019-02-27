@@ -6,7 +6,7 @@ max_threads: 200
 
 # HTTP
 headers:
-  user_agent: Mozilla/5.0
+  user-agent: Mozilla/5.0
 max_requests: 2000000
 
 # MySQL

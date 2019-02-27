@@ -4,17 +4,20 @@ import logging
 import logging.config
 import os
 import redis
+import sys
 
 from datetime import datetime
+from db_setup import create_db
 from helpers import dequeue_url, enqueue_url, make_request
-from models import set_up, Category, Product, Shop
+from models import Product, Shop
 from settings import Settings
 from sys import argv
 
 
 # collect date of run
-DATE = datetime.now().strftime('%Y_%m_%d')
-TMESTAMP = datetime.now().strftime('%Y-%m-%d')
+GLOBAL_DATETIME = datetime.now()
+DATE = GLOBAL_DATETIME.strftime('%Y_%m_%d')
+TIMESTAMP = GLOBAL_DATETIME.strftime('%Y-%m-%d')
 
 
 # instantiate settings variables
@@ -84,6 +87,7 @@ def harvest_directories():
 def harvest_products():
     # pop url from redis db
     url = dequeue_url('product_q')
+    print(url)
     if not url:
         logging.info('COMPLETE: product url processing')
         return
@@ -110,8 +114,8 @@ def harvest_shops():
 
     # process and insert shop data
     json_obj = make_request(url)
-    shop = Shop(json_obj)
-    if shop.save(DATE) == 0:
+    shop = Shop(DATE, TIMESTAMP, json_obj)
+    if shop.save() == 0:
         logging.info('COMPLETE: shop (%i)' % shop.id)
     else:
         logging.info('INSERT FAIL: shop (%i)' % shop.id)
@@ -140,7 +144,7 @@ if __name__ == '__main__':
 
     # seed urls if first run
     if len(argv) > 1 and argv[1] == 'seed':
-        logging.info('FLUSHIN REDIS DB')
+        logging.info('FLUSHING REDIS DB')
         redis.flushdb()
         logging.info('STARTING: seeding direcotry urls')
         create_directory_urls()
@@ -148,9 +152,11 @@ if __name__ == '__main__':
     # look for second positional arg
     if len(argv) > 2 and argv[2] == 'create':
         logging.info('CREATING NEW SET OF DBS FOR {}'.format(DATE))
-        set_up(DATE)
-        # get data from API endpoint fro categories
-        cat_json = make_request('https://shopee.co.id/api/v1/category_list/')
-        Category(DATE, cat_json)
+        if create_db == 0:
+            logging.info('COMPLETE: db set up')
+        else:
+            logging.error('DB SET UP FAILED')
+            logging.error('EXITING PROGRAM')
+            sys.exit()
 
     shopee_scraper()

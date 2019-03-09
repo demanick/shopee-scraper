@@ -64,6 +64,7 @@ def harvest_directories():
         logging.info('COMPLETE: directory url processing')
         logging.info('%i product urls processed' % product_counter)
         logging.info('%i shop urls processed' % len(shop_cache))
+        return
 
     # extract json
     json_obj = make_request(directory_url)
@@ -86,7 +87,6 @@ def harvest_directories():
 def harvest_products():
     # pop url from redis db
     url = dequeue_url('product_q')
-    print(url)
     if not url:
         logging.info('COMPLETE: product url processing')
         return

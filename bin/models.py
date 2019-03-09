@@ -50,7 +50,7 @@ class Product(object):
         for catid in self.catids:
             try:
                 cur.execute('''
-                INSERT INTO product_id_map_{} (
+                INSERT INTO product_cat_map_{} (
                     extract_date,
                     catid,
                     productid

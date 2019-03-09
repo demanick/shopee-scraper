@@ -89,7 +89,7 @@ def create_db(date):
 
     # create product_cat_map table
     try:
-        cur.execute('''CREATE TABLE IF NOT EXISTS productid_map_{} (
+        cur.execute('''CREATE TABLE IF NOT EXISTS product_cat_map_{} (
             extract_date date,
             productid int,
             catid int,

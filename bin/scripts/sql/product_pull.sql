@@ -1,9 +1,9 @@
 SELECT
   p.id,
   p.name,
-  c.catid,
-  c.catname,
-  c.catlevel,
+  pmap.catid,
+  pmap.catname,
+  pmap.catlevel,
   p.shopid,
   p.price_min,
   p.price_max,
@@ -19,12 +19,20 @@ SELECT
 FROM
   shopee.products_2019_02_08 p
 LEFT JOIN
-  shopee.productid_map_2019_02_21 pmap
+  (
+  SELECT
+    pmap.productid,
+    pmap.catid,
+    c.catname,
+    c.catlevel
+  FROM
+    shopee.productid_map_2019_02_21 pmap
+  LEFT JOIN
+    shopee.categories_2019_02_21 c
+  ON
+    pmap.catid = c.catid
+  WHERE
+    c.catlevel= 'main'
+  ) pmap
 ON
   p.id = pmap.productid
-LEFT JOIN
-  shopee.categories_2019_02_21 c
-ON
-  c.id = pmap.catid
-WHERE
-  c.catlevel = 'main' OR c.catlevel IS NULL

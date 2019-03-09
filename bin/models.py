@@ -42,7 +42,7 @@ class Product(object):
         self.rating_count = self._rating_count(item_json)
         self.likes = item_json['liked_count']
         self.comments = item_json['cmt_count']
-        self.sold = item_json['sold']
+        self.sold = item_json['historical_sold']
         self.stock = item_json['stock']
         self.free_shipping = item_json['show_free_shipping']
 

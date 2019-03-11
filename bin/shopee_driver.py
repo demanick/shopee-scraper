@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # look for second positional arg
     if len(argv) > 2 and argv[2] == 'create':
         logging.info('CREATING NEW SET OF DBS FOR {}'.format(DATE))
-        if create_db == 0:
+        if create_db(DATE) == 0:
             logging.info('COMPLETE: db set up')
         else:
             logging.error('DB SET UP FAILED')

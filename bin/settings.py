@@ -40,11 +40,11 @@ class Settings(object):
         self.max_threads = params['max_threads']
 
         # load proxy ips from csv
-        self.proxy_urls = []
-        with open(os.path.join(ROOT, 'data', 'ips-static.csv'), 'r') as csvfile:
-            proxyreader = csv.reader(csvfile)
-            for row in proxyreader:
-                self.proxy_urls.append(row[0])
+        # self.proxy_urls = []
+        # with open(os.path.join(ROOT, 'data', 'ips-static.csv'), 'r') as csvfile:
+            # proxyreader = csv.reader(csvfile)
+            # for row in proxyreader:
+                # self.proxy_urls.append(row[0])
 
 if __name__ == '__main__':
     # print params as disctionary

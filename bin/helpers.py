@@ -48,15 +48,14 @@ def make_request(url, return_json=True):
 
 def get_proxy():
     # choose a proxy server to use for this request, if we need one
-    if not settings.proxy_urls or len(settings.proxy_urls) == 0:
-        return None
+    # if not settings.proxy_urls or len(settings.proxy_urls) == 0:
+        # return None
 
-    proxy_ip = random.choice(settings.proxy_urls)
+    # proxy_ip = random.choice(settings.proxy_urls)
     proxy_url = "http://{user}:{passwd}@zproxy.lum-superproxy.io:{port}".format(
         user=settings.proxy_user,
         passwd=settings.proxy_pass,
-        port=settings.proxy_port,
-
+        port=settings.proxy_port
     )
 
     return {

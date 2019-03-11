@@ -49,6 +49,7 @@ def create_db(date):
             products int,
             rating float,
             rating_count int,
+            mall boolean,
             PRIMARY KEY (id)
         )'''.format(date))
         conn.commit()
@@ -96,7 +97,7 @@ def create_db(date):
             FOREIGN KEY (productid) REFERENCES products_{} (id),
             FOREIGN KEY (catid) REFERENCES categories (id)
         )'''.format(date, date))
-        conn.commt()
+        conn.commit()
     except Exception as e:
         conn.rollback()
         log.error(e)

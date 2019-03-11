@@ -1,6 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 import logging
+import logging.config
 import os
 import redis
 import sys
@@ -95,11 +96,13 @@ def harvest_products():
     json_obj = make_request(url)
     product = Product(DATE, TIMESTAMP, json_obj)
     # map and save products
-    product.map()
     if product.save() == 0:
         logging.info('COMPLETE: product (%i); shop (%i)' % (product.id, product.shopid))
     else:
         logging.warning('INSERT FAIL: product (%i); shop (%i)' % (product.id, product.shopid))
+
+    # add product category mapping
+    product.map()
 
     pile.spawn(harvest_products)
 

@@ -52,10 +52,9 @@ def get_proxy():
         return None
 
     proxy_ip = random.choice(settings.proxy_urls)
-    proxy_url = "http://{user}:{passwd}@{ip}:{port}/".format(
+    proxy_url = "http://{user}:{passwd}@zproxy.lum-superproxy.io:{port}".format(
         user=settings.proxy_user,
         passwd=settings.proxy_pass,
-        ip=proxy_ip,
         port=settings.proxy_port,
 
     )

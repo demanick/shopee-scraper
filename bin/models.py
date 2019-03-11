@@ -148,7 +148,7 @@ class Shop(object):
                 rating_count,
                 mall
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             '''.format(self.date), (
                 self.timestamp,
                 self.id,

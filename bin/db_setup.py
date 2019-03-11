@@ -23,7 +23,7 @@ cur = conn.cursor()
 
 def delete_db(date):
     '''Deletes all tables for a specified date'''
-    base_tables = ['product_cat_map{}', 'categories_{}', 'products_{}', 'shops_{}']
+    base_tables = ['product_cat_map_{}', 'categories_{}', 'products_{}', 'shops_{}']
     date_tables = [t.format(date) for t in base_tables]
     for t in date_tables:
         try:
@@ -49,6 +49,7 @@ def create_db(date):
             products int,
             rating float,
             rating_count int,
+            mall boolean,
             PRIMARY KEY (id)
         )'''.format(date))
         conn.commit()
@@ -91,12 +92,12 @@ def create_db(date):
     try:
         cur.execute('''CREATE TABLE IF NOT EXISTS product_cat_map_{} (
             extract_date date,
-            productid int,
+            productid bigint,
             catid int,
-            FOREIGN KEY (productid) REFERENCES products_{},
-            FOREIGN KEY (catid) REFERENCES categories
+            FOREIGN KEY (productid) REFERENCES products_{} (id),
+            FOREIGN KEY (catid) REFERENCES categories (id)
         )'''.format(date, date))
-        conn.commt()
+        conn.commit()
     except Exception as e:
         conn.rollback()
         log.error(e)

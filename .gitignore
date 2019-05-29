@@ -11,4 +11,5 @@ notebooks/*
 settings_prod.yaml
 
 # virutalenv
+shopee-scraper-env/*
 shopee_scraper_env/*

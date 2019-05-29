@@ -10,15 +10,15 @@ headers:
 max_requests: 2000000
 
 # MySQL
-host: scrapingdb.cexqjqkwvxs5.us-east-1.rds.amazonaws.com
-user: nad385
-pw: 9dETROIT^
+host:
+user:
+pw:
 db_name: shopee
 
 # Proxies
-proxy_user: lum-customer-hl_4300955c-zone-static
-proxy_pass: qrab6knjacsq
-proxy_port: 22225
+proxy_user:
+proxy_pass:
+proxy_port:
 
 # Redis
 redis_host: localhost

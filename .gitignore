@@ -1,14 +1,15 @@
 # data
 data/*.csv
+data/ips-static.txt
 docs/*
 trees/*
 
 # other
 *.log
 bin/__pycache__/*
-bin/data/*
 notebooks/*
 settings_prod.yaml
 
 # virutalenv
+shopee-scraper-env/*
 shopee_scraper_env/*
